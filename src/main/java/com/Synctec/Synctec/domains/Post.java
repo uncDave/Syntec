@@ -13,22 +13,21 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Post extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
-    private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private BaseUser user;
 
+    private String NameOfPoster;
+
+    private String slug;
+
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    private String mediaUrl;
 
-    @Column(columnDefinition = "TIMESTAMP")
-    private Instant createdAt;
+    private int likeCount = 0;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments;

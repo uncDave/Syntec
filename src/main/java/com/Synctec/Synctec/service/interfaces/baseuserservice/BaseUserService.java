@@ -23,6 +23,10 @@ public interface BaseUserService {
     ResponseEntity<ApiResponse<?>> fetchUserDetails(String username);
     ResponseEntity<ApiResponse<?>> changePassword(String userId,ChangePasswordRequest changePasswordRequest);
     ResponseEntity<ApiResponse<?>> createCommunity(String userId, CreateCommunityRequest communityRequest);
+    ResponseEntity<ApiResponse<?>>joinWaitList(WaitListDto.Request waitlist);
+
+
+
 
 
 

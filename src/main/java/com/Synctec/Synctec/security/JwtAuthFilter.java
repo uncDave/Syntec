@@ -107,7 +107,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 requestURI.startsWith("/api/v1/auth/google")||
                 requestURI.startsWith("/api/v1/auth/verify")||
                 requestURI.startsWith("/api/v1/auth/initiate-twitter")||
-                requestURI.startsWith("/api/v1/auth/verify-twitter");
+                requestURI.startsWith("/api/v1/auth/verify-twitter")||
+                requestURI.startsWith("/api/v1/waitlist/join-waitlist");
     }
 
 }

@@ -13,6 +13,7 @@ import java.security.Principal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @Slf4j
 public class UserController {
     private final BaseUserService baseUserService;

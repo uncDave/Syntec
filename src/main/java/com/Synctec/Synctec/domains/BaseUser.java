@@ -81,6 +81,14 @@ public class BaseUser extends BaseEntity implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "community_id")
     )
     private Set<Community> communities;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Comment> comments;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Post> posts;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Like> likes;
 
 
 //    @Column(columnDefinition = "BOOLEAN DEFAULT false")

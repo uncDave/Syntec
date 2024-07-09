@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Entity
 @Table(name = "comment")
@@ -21,10 +22,13 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "user_id")
     private BaseUser user;
 
+    private String NameOfPoster;
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(columnDefinition = "TIMESTAMP")
-    private Instant createdAt;
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Reply> replies; // Updated to reference the Reply entity
+
 
 }

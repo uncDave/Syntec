@@ -11,9 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Like extends BaseEntity{
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")

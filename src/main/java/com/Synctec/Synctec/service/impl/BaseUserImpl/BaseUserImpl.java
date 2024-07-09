@@ -1,8 +1,6 @@
 package com.Synctec.Synctec.service.impl.BaseUserImpl;
 
-import com.Synctec.Synctec.domains.BaseUser;
-import com.Synctec.Synctec.domains.Community;
-import com.Synctec.Synctec.domains.VerificationToken;
+import com.Synctec.Synctec.domains.*;
 import com.Synctec.Synctec.dtos.request.*;
 import com.Synctec.Synctec.dtos.response.UserProfileDetailResponse;
 import com.Synctec.Synctec.email.EmailService;
@@ -10,10 +8,8 @@ import com.Synctec.Synctec.enums.Roles;
 import com.Synctec.Synctec.repository.BaseUserRepository;
 import com.Synctec.Synctec.repository.TokenRepository;
 import com.Synctec.Synctec.security.JwtService;
-import com.Synctec.Synctec.service.interfaces.JpaInterfaces.CommunityJpaService;
-import com.Synctec.Synctec.service.interfaces.JpaInterfaces.TokenJpaService;
+import com.Synctec.Synctec.service.interfaces.JpaInterfaces.*;
 import com.Synctec.Synctec.service.interfaces.baseuserservice.BaseUserService;
-import com.Synctec.Synctec.service.interfaces.JpaInterfaces.UserJpaService;
 import com.Synctec.Synctec.utils.ApiResponse;
 import com.Synctec.Synctec.utils.Validators.UserValidation;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +44,10 @@ public class BaseUserImpl implements BaseUserService {
     private final UserJpaService userJpaService;
     private final TokenJpaService tokenJpaService;
     private final CommunityJpaService communityJpaService;
+    private final PostJpaService postJpaService;
+    private final LikeJpaService likeJpaService;
+    private final CommentJpaService commentJpaService;
+    private final WaitListJpaInterface waitListJpaInterface;
 
 
     @Override
@@ -383,6 +383,17 @@ public class BaseUserImpl implements BaseUserService {
 
     }
 
+    @Override
+    public ResponseEntity<ApiResponse<?>> joinWaitList(WaitListDto.Request waitlist) {
+        WaitList waitList =  WaitList.builder()
+                .phoneNo(waitlist.getPhoneNo())
+                .fullName(waitlist.getFullName())
+                .email(waitlist.getEmail()).build();
+        WaitList savedWaitList = waitListJpaInterface.createWaitList(waitList);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(createSuccessResponse(savedWaitList, "Congratulations!, you have successfully joined the waitlist"));
+    }
 
     private void sendVerificationToken(VerificationToken token) {
         BaseUser user = token.getBaseUser();

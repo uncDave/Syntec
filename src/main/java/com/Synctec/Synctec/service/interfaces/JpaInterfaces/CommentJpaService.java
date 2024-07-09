@@ -2,8 +2,13 @@ package com.Synctec.Synctec.service.interfaces.JpaInterfaces;
 
 
 import com.Synctec.Synctec.domains.Comment;
+import com.Synctec.Synctec.domains.Post;
+
+import java.util.Optional;
 
 public interface CommentJpaService {
 
-    Comment createComment(Comment post);
+    Comment create(Comment comment);
+    Optional<Comment> findById(String commentId);
+
 }

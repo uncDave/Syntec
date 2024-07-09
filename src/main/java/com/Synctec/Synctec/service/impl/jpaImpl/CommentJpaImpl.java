@@ -8,6 +8,8 @@ import com.Synctec.Synctec.service.interfaces.JpaInterfaces.CommunityJpaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class CommentJpaImpl implements CommentJpaService {
@@ -15,7 +17,12 @@ public class CommentJpaImpl implements CommentJpaService {
 
 
     @Override
-    public Comment createComment(Comment comment) {
+    public Comment create(Comment comment) {
        return commentRepository.save(comment);
+    }
+
+    @Override
+    public Optional<Comment> findById(String commentId) {
+        return commentRepository.findById(commentId);
     }
 }
