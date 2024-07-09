@@ -13,5 +13,7 @@ public class CommentResponseDTO {
     private String userId;
     private String username;
     private String content;
+    private int likeCount;
+    private Instant createdAt;
     private List<ReplyResponseDTO> replies;
 }

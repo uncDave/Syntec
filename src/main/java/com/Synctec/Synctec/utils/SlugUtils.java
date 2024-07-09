@@ -8,6 +8,12 @@ import org.springframework.stereotype.Service;
 import java.text.Normalizer;
 import java.util.Locale;
 import java.util.regex.Pattern;
+
+/**
+ * A Utility class that provides function for generating unique slugs used by the post entity)
+ * over the network .
+ * @author Chukwudile .I. David.
+ */
 @RequiredArgsConstructor
 @Service
 public class SlugUtils {

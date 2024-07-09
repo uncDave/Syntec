@@ -11,5 +11,6 @@ public class ReplyResponseDTO {
     private String userId;
     private String username;
     private String content;
+    private int likeCount;
     private Instant createdAt;
 }

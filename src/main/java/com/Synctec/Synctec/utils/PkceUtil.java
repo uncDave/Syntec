@@ -6,6 +6,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+/**
+ * A Utility class that provides function for generating a string and hashing the string using sha-256, that is sent to twitter)
+ * over the network .
+ * @author Chukwudile .I. David.
+ */
+
 public class PkceUtil {
     public static String generateCodeVerifier() {
         SecureRandom random = new SecureRandom();

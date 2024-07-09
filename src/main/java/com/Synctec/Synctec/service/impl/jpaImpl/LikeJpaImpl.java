@@ -1,8 +1,6 @@
 package com.Synctec.Synctec.service.impl.jpaImpl;
 
-import com.Synctec.Synctec.domains.BaseUser;
-import com.Synctec.Synctec.domains.Like;
-import com.Synctec.Synctec.domains.Post;
+import com.Synctec.Synctec.domains.*;
 import com.Synctec.Synctec.repository.LikeRepository;
 import com.Synctec.Synctec.service.interfaces.JpaInterfaces.LikeJpaService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +20,18 @@ public class LikeJpaImpl implements LikeJpaService {
     @Override
     public Optional<Like> findByPostAndUser(Post post, BaseUser baseUser) {
         Optional<Like> optionalLike = likeRepository.findByPostAndAndUser(post, baseUser);
+        return optionalLike;
+    }
+
+    @Override
+    public Optional<Like> findByCommentAndUser(Comment comment, BaseUser baseUser) {
+        Optional<Like> optionalLike = likeRepository.findByCommentAndAndUser(comment, baseUser);
+        return optionalLike;
+    }
+
+    @Override
+    public Optional<Like> findByReplyAndUser(Reply reply, BaseUser baseUser) {
+        Optional<Like> optionalLike = likeRepository.findByReplyAndAndUser(reply, baseUser);
         return optionalLike;
     }
 }

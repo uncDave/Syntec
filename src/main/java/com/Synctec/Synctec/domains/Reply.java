@@ -3,6 +3,8 @@ package com.Synctec.Synctec.domains;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "reply")
 @Getter
@@ -26,5 +28,10 @@ public class Reply extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")     // Foreign key to the post to which the comment belongs
     private Post post;
+
+    private int likeCount = 0;
+
+    @OneToMany(mappedBy = "reply", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Like> likes;
 
 }

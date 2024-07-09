@@ -1,9 +1,7 @@
 package com.Synctec.Synctec.service.impl.BaseUserImpl;
 
 import com.Synctec.Synctec.domains.*;
-import com.Synctec.Synctec.dtos.request.CreateCommentDTO;
-import com.Synctec.Synctec.dtos.request.CreateReplyDto;
-import com.Synctec.Synctec.dtos.request.PostLikeRequest;
+import com.Synctec.Synctec.dtos.request.*;
 import com.Synctec.Synctec.dtos.response.CommentResponseDTO;
 import com.Synctec.Synctec.dtos.response.CreatePostResponse;
 import com.Synctec.Synctec.dtos.response.PostWithDetailsDTO;
@@ -108,18 +106,21 @@ public class PostServiceImpl implements PostService {
                         .mediaUrl(post.getMediaUrl())
                         .slug(post.getSlug())
                         .likeCount(post.getLikeCount())
+                        .createdAt(post.getCreatedDate())
                         .comments(post.getComments().stream()
                                 .map(comment -> CommentResponseDTO.builder()
                                         .commentId(comment.getId())
                                         .userId(comment.getUser().getId())
+                                        .likeCount(comment.getLikeCount())
                                         .username(comment.getUser().getUsername())
                                         .content(comment.getContent())
-//                                        .createdAt(comment.getCreatedDate())
+                                        .createdAt(comment.getCreatedDate())
                                         .replies(comment.getReplies().stream()
                                                 .map(reply -> ReplyResponseDTO.builder()
                                                         .replyId(reply.getId())
                                                         .userId(reply.getUser().getId())
                                                         .username(reply.getUser().getUsername())
+                                                        .likeCount(reply.getLikeCount())
                                                         .content(reply.getContent())
                                                         .createdAt(reply.getCreatedDate())
                                                         .build())
@@ -262,4 +263,80 @@ public class PostServiceImpl implements PostService {
         }
         return ResponseEntity.status(HttpStatus.OK).body(createSuccessMessage("successful"));
     }
+
+    @Override
+    public ResponseEntity<ApiResponse<?>> toggleCommentLike(String userId, CommentLikeRequest commentLikeRequest) {
+        String commentId = commentLikeRequest.getCommentId();
+
+        Optional<Comment> commentOptional = commentJpaService.findById(commentId);
+        Optional<BaseUser> userOptional = userJpaService.findById(userId);
+
+        if (commentOptional.isPresent() && userOptional.isPresent()) {
+            Comment comment = commentOptional.get();
+            BaseUser user = userOptional.get();
+            Optional<Like> existingLike = likeJpaService.findByCommentAndUser(comment, user);
+            if (existingLike.isPresent()) {
+                Like like = existingLike.get();
+                if (like.isLiked()) {
+                    comment.setLikeCount(comment.getLikeCount() - 1);
+                    like.setLiked(false);
+                } else {
+                    comment.setLikeCount(comment.getLikeCount() + 1);
+                    like.setLiked(true);
+                }
+                likeJpaService.saveLikes(like);
+        }
+            else {
+                Like newLike = Like.builder()
+                        .comment(comment)
+                        .user(user)
+                        .liked(true)
+                        .build();
+                comment.setLikeCount(comment.getLikeCount() + 1);
+                likeJpaService.saveLikes(newLike);
+            }
+            commentJpaService.create(comment);
+            return ResponseEntity.status(HttpStatus.OK).body(createSuccessMessage("Like toggled successfully"));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createFailureResponse("Comment or user not found","Comment or user not found"));
+        }
+
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<?>> toggleReplyLike(String userId, ReplyLikeRequest replyLikeRequest) {
+        String replyId = replyLikeRequest.getReplyId();
+        Optional<Reply> replyOptional = replyJpaInterface.findById(replyId);
+        Optional<BaseUser> userOptional = userJpaService.findById(userId);
+        if (replyOptional.isPresent() && userOptional.isPresent()) {
+            Reply reply = replyOptional.get();
+            BaseUser user = userOptional.get();
+            Optional<Like> existingLike = likeJpaService.findByReplyAndUser(reply, user);
+
+            if (existingLike.isPresent()) {
+                Like like = existingLike.get();
+                if (like.isLiked()) {
+                    reply.setLikeCount(reply.getLikeCount() - 1);
+                    like.setLiked(false);
+                } else {
+                    reply.setLikeCount(reply.getLikeCount() + 1);
+                    like.setLiked(true);
+                }
+                likeJpaService.saveLikes(like);
+            } else {
+                Like newLike = Like.builder()
+                        .reply(reply)
+                        .user(user)
+                        .liked(true)
+                        .build();
+                reply.setLikeCount(reply.getLikeCount() + 1);
+                likeJpaService.saveLikes(newLike);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(createSuccessMessage("Like toggled successfully"));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createFailureResponse("Comment or user not found","Comment or user not found"));
+        }
+    }
+
+
 }

@@ -3,6 +3,7 @@ package com.Synctec.Synctec.dtos.response;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -13,6 +14,7 @@ public class PostWithDetailsDTO {
     private String slug;
     private String mediaUrl;
     private int likeCount;
+    private Instant createdAt;
     private List<CommentResponseDTO> comments;
 //    private List<ReplyResponseDTO> replies;
 }

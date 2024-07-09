@@ -6,6 +6,8 @@ import com.Synctec.Synctec.service.interfaces.JpaInterfaces.ReplyJpaInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class ReplyJpaImpl implements ReplyJpaInterface {
@@ -14,5 +16,10 @@ public class ReplyJpaImpl implements ReplyJpaInterface {
     public Reply createReply(Reply reply) {
         return repository.save(reply);
 
+    }
+
+    @Override
+    public Optional<Reply> findById(String replyId) {
+       return repository.findById(replyId);
     }
 }

@@ -1,9 +1,6 @@
 package com.Synctec.Synctec.controllers.Posts;
 
-import com.Synctec.Synctec.dtos.request.AllPostDTO;
-import com.Synctec.Synctec.dtos.request.CreateCommentDTO;
-import com.Synctec.Synctec.dtos.request.CreateReplyDto;
-import com.Synctec.Synctec.dtos.request.PostLikeRequest;
+import com.Synctec.Synctec.dtos.request.*;
 import com.Synctec.Synctec.service.interfaces.baseuserservice.PostService;
 import com.Synctec.Synctec.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +33,7 @@ public class PostController {
     }
 
     @GetMapping("/get-allPosts")
-    public ResponseEntity<ApiResponse<?>> getTransactions(AllPostDTO request) {
+    public ResponseEntity<ApiResponse<?>> getAllPost(AllPostDTO request) {
         if (request == null) {
             request = new AllPostDTO();
         }
@@ -73,6 +70,19 @@ public class PostController {
         String userId = principal.getName();
         log.info("this is the request to like a post:{}",request);
         return postService.toggleLike(userId,request);
+    }
+
+    @PostMapping ("/like-comment")
+    public ResponseEntity<ApiResponse<?>> likeComment(Principal principal, @RequestBody CommentLikeRequest request){
+        String userId = principal.getName();
+        log.info("this is the request to like a post:{}",request);
+        return postService.toggleCommentLike(userId,request);
+    }
+
+    @PostMapping("/like-reply")
+    public ResponseEntity<ApiResponse<?>> toggleReplyLike(Principal principal, @RequestBody ReplyLikeRequest request) {
+        String userId = principal.getName();
+        return postService.toggleReplyLike(userId, request);
     }
 
 
