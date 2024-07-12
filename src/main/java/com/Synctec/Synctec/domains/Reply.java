@@ -26,7 +26,7 @@ public class Reply extends BaseEntity{
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")     // Foreign key to the post to which the comment belongs
+    @JoinColumn(name = "post_id")     // Foreign key to the post to which the reply belongs
     private Post post;
 
     private int likeCount = 0;

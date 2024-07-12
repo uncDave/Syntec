@@ -8,12 +8,13 @@ import java.util.List;
 
 @Data
 @Builder
-public class CommentResponseDTO {
+public class CommentDTO {
     private String commentId;
     private String userId;
     private String username;
     private String content;
+    private String parentId;
     private int likeCount;
     private Instant createdAt;
-    private List<ReplyResponseDTO> replies;
+    private List<CommentDTO> replies;
 }

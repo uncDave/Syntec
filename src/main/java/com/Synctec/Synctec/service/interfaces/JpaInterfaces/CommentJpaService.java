@@ -10,5 +10,6 @@ public interface CommentJpaService {
 
     Comment create(Comment comment);
     Optional<Comment> findById(String commentId);
+    Optional<Comment> findByParentId(String commentId);
 
 }

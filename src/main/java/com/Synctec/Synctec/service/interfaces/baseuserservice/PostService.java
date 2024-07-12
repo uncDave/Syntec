@@ -14,4 +14,6 @@ public interface PostService {
     ResponseEntity<ApiResponse<?>> toggleCommentLike(String userId, CommentLikeRequest commentLikeRequest);
     ResponseEntity<ApiResponse<?>> toggleReplyLike(String userId, ReplyLikeRequest replyLikeRequest);
 
+    ResponseEntity<ApiResponse<?>> getAllpostWithDetails2(int page, int size,String sortDirection,String sortBy);
+
 }

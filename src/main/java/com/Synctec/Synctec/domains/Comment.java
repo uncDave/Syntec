@@ -22,15 +22,19 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "user_id")
     private BaseUser user;
 
-    private String NameOfPoster;
+    private String nameOfPoster;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    private String parentId;
+
+
     private int likeCount = 0;
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Reply> replies; // Updated to reference the Reply entity
+    private Set<Reply> replies;
+
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Like> likes;

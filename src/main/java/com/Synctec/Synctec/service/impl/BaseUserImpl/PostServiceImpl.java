@@ -2,7 +2,7 @@ package com.Synctec.Synctec.service.impl.BaseUserImpl;
 
 import com.Synctec.Synctec.domains.*;
 import com.Synctec.Synctec.dtos.request.*;
-import com.Synctec.Synctec.dtos.response.CommentResponseDTO;
+//import com.Synctec.Synctec.dtos.response.CommentResponseDTO;
 import com.Synctec.Synctec.dtos.response.CreatePostResponse;
 import com.Synctec.Synctec.dtos.response.PostWithDetailsDTO;
 import com.Synctec.Synctec.dtos.response.ReplyResponseDTO;
@@ -108,43 +108,49 @@ public class PostServiceImpl implements PostService {
                         .likeCount(post.getLikeCount())
                         .createdAt(post.getCreatedDate())
                         .comments(post.getComments().stream()
-                                .map(comment -> CommentResponseDTO.builder()
+                                .map(comment -> CreateCommentDTO.CreateCommentResponse.builder()
+                                        .postId(comment.getPost().getId())
                                         .commentId(comment.getId())
                                         .userId(comment.getUser().getId())
                                         .likeCount(comment.getLikeCount())
+                                        .parentId(comment.getParentId())
                                         .username(comment.getUser().getUsername())
                                         .content(comment.getContent())
                                         .createdAt(comment.getCreatedDate())
                                         .replies(comment.getReplies().stream()
-                                                .map(reply -> ReplyResponseDTO.builder()
+                                                .map(reply -> CreateReplyDto.CreateReplyResponse.builder()
                                                         .replyId(reply.getId())
+                                                        .postId(reply.getPost().getId())
                                                         .userId(reply.getUser().getId())
-                                                        .username(reply.getUser().getUsername())
-                                                        .likeCount(reply.getLikeCount())
+                                                        .commentId(reply.getComment().getId())
                                                         .content(reply.getContent())
+                                                        .likeCount(reply.getLikeCount())
+                                                        .username(reply.getUser().getUsername())
                                                         .createdAt(reply.getCreatedDate())
                                                         .build())
                                                 .collect(Collectors.toList()))
-                                        .build())
-                                .collect(Collectors.toList()))
-                        .build())
+                                        .build()) // Build the CreateCommentResponse object
+                                .collect(Collectors.toList())) // Collect the list of CreateCommentResponse objects
+                        .build()) // Build the PostWithDetailsDTO object
                 .collect(Collectors.toList());
 
         // Return the response
         return ResponseEntity.status(HttpStatus.OK).body(createSuccessResponse(allPostWithDetails, "Successfully retrieved"));
-
     }
+
 
     @Override
     public ResponseEntity<ApiResponse<?>> commentOnPost(String userId,CreateCommentDTO.Request request) {
         String postId = request.getPostId();
         String userIdentifier  = userId;
+//        String parentId = request.getCommentId();
         String content = request.getContent();
         log.info("This is the userId:{}", userId);
         log.info("This is the postId:{}", postId);
 
         Optional<Post> postOptional = postJpaService.findById(postId);
         Optional<BaseUser> userOptional = userJpaService.findById(userIdentifier);
+//        Optional<Comment> commentOptional = commentJpaService.findById(parentId);
         if (postOptional.isPresent() && userOptional.isPresent()) {
             Post post = postOptional.get();
             BaseUser user = userOptional.get();
@@ -152,6 +158,8 @@ public class PostServiceImpl implements PostService {
             Comment comment = Comment.builder()
                     .post(post)
                     .user(user)
+                    .nameOfPoster(user.getUsername())
+//                    .parentId(parentId)
                     .content(content)
                     .build();
 
@@ -162,10 +170,12 @@ public class PostServiceImpl implements PostService {
 
 
             CreateCommentDTO.CreateCommentResponse response = CreateCommentDTO.CreateCommentResponse.builder()
-                    .postId(post.getId())
+                    .postId(postId)
                     .commentId(savedComment.getId())
                     .content(comment.getContent())
+//                    .parentId(parentId)
                     .username(user.getUsername())
+                    .createdAt(comment.getCreatedDate())
                     .userId(comment.getUser().getId()).build();
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(createSuccessResponse(response, "Congratulations!, you have successfully commented on a post " + post.getSlug()));
@@ -175,51 +185,72 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<?>> replyComment(String userId,CreateReplyDto.Request request) {
+    public ResponseEntity<ApiResponse<?>> replyComment(String userId, CreateReplyDto.Request request) {
         String commentId = request.getCommentId();
         String postId = request.getPostId();
-        String userIdentifier = userId;
+        String replyId = request.getReplyId();
         String content = request.getContent();
 
-        log.info("This is the userId:{}", userId);
-        log.info("This is the postId:{}", postId);
+        Optional<Post> postOptional = postJpaService.findById(postId);
+        Optional<BaseUser> userOptional = userJpaService.findById(userId);
 
-        Optional<Comment> commentOptional = commentJpaService.findById(commentId);
-        Optional<Post> postOptional =postJpaService.findById(postId);
-        Optional<BaseUser> userOptional =userJpaService.findById(userIdentifier);
-        if (commentOptional.isPresent() && postOptional.isPresent() && userOptional.isPresent()) {
-            Comment comment = commentOptional.get();
-            Post post = postOptional.get();
-            BaseUser user = userOptional.get();
-
-            // Build the Reply entity
-            Reply reply = Reply.builder()
-                    .comment(comment)
-                    .post(post)
-                    .user(user)
-                    .content(content)
-                    .build();
-
-
-            Reply savedReply = replyJpaInterface.createReply(reply);
-            comment.getReplies().add(savedReply);
-
-            CreateReplyDto.CreateReplyResponse response = CreateReplyDto.CreateReplyResponse.builder()
-                    .postId(savedReply.getPost().getId())
-                    .commentId(savedReply.getComment().getId())
-                    .userId(savedReply.getUser().getId())
-                    .username(savedReply.getUser().getUsername())
-                    .content(savedReply.getContent()).build();
-
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(createSuccessResponse(response, "Congratulations!, you have successfully replied a comment"));
-
-
-        }else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createFailureResponse("Post or User or comment not found", "Post or User or comment not found"));
+        if (postOptional.isEmpty() || userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createFailureResponse("Post or User not found", "Post or User not found"));
         }
 
+        Post post = postOptional.get();
+        BaseUser user = userOptional.get();
+        Comment parentComment = null;
+
+        if (replyId != null) {
+            Optional<Reply> replyOptional = replyJpaInterface.findById(replyId);
+            if (replyOptional.isPresent()) {
+                parentComment = replyOptional.get().getComment();
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createFailureResponse("reply not found", "provide a valid reply id"));
+            }
+        } else if (commentId != null) {
+            Optional<Comment> commentOptional = commentJpaService.findById(commentId);
+            if (commentOptional.isPresent()) {
+                parentComment = commentOptional.get();
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createFailureResponse("comment not found", "provide a valid comment id"));
+            }
+        }
+
+        if (parentComment == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createFailureResponse("comment or reply not found", "comment or reply not found"));
+        }
+
+        // Build the Comment entity as a reply
+        Reply reply = Reply.builder()
+                .post(post)
+                .user(user)
+                .comment(parentComment)
+                .content(content)
+                .build();
+
+        Reply savedReply = replyJpaInterface.createReply(reply);
+
+        CreateReplyDto.CreateReplyResponse response = CreateReplyDto.CreateReplyResponse.builder()
+                .replyId(savedReply.getId())
+                .postId(savedReply.getPost().getId())
+                .commentId(savedReply.getComment().getId())
+                .userId(savedReply.getUser().getId())
+                .username(savedReply.getUser().getUsername())
+                .content(savedReply.getContent())
+                .createdAt(savedReply.getCreatedDate())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(createSuccessResponse(response, "Congratulations! You have successfully replied to a comment"));
     }
+
+
 
     @Override
     public ResponseEntity<ApiResponse<?>> toggleLike(String userId,PostLikeRequest postLikeRequest) {
@@ -336,6 +367,11 @@ public class PostServiceImpl implements PostService {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createFailureResponse("Comment or user not found","Comment or user not found"));
         }
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<?>> getAllpostWithDetails2(int page, int size, String sortDirection, String sortBy) {
+        return null;
     }
 
 

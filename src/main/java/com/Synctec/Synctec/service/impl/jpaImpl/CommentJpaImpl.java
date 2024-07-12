@@ -25,4 +25,9 @@ public class CommentJpaImpl implements CommentJpaService {
     public Optional<Comment> findById(String commentId) {
         return commentRepository.findById(commentId);
     }
+
+    @Override
+    public Optional<Comment> findByParentId(String parentId) {
+        return commentRepository.findByParentId(parentId);
+    }
 }
