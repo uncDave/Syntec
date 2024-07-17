@@ -8,7 +8,7 @@ public interface AuthorizationService {
 
     ResponseEntity<ApiResponse<?>> generateTwitterAuthorizationUrl();
 
-    ResponseEntity<ApiResponse<?>> verifyGoogleAuth(String code, String state, String error);
+    ResponseEntity<ApiResponse<?>> verifyAuth(String code, String state, String error);
 
     ResponseEntity<ApiResponse<?>> verifyTwitterAuth(String authorizationCode);
 }

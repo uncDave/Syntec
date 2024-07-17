@@ -12,6 +12,8 @@ import com.Synctec.Synctec.service.interfaces.JpaInterfaces.*;
 import com.Synctec.Synctec.service.interfaces.baseuserservice.BaseUserService;
 import com.Synctec.Synctec.utils.ApiResponse;
 import com.Synctec.Synctec.utils.Validators.UserValidation;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,12 +23,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import static com.Synctec.Synctec.utils.ResponseUtils.*;
 
@@ -48,6 +49,8 @@ public class BaseUserImpl implements BaseUserService {
     private final LikeJpaService likeJpaService;
     private final CommentJpaService commentJpaService;
     private final WaitListJpaInterface waitListJpaInterface;
+    private final Cloudinary cloudinary;
+    private final ProfileJpaService profileJpaService;
 
 
     @Override
@@ -105,6 +108,69 @@ public class BaseUserImpl implements BaseUserService {
         }
 
     }
+
+    @Override
+    public ResponseEntity<ApiResponse<?>> createprofile(String userId,MultipartFile profilePicture, MultipartFile backgroundPicture, String firstName, String lastName, String phoneNumber, String dob) {
+        try {
+            Optional<BaseUser> userOptional = userJpaService.findById(userId);
+            if (userOptional.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createFailureResponse(" User not found", "User not found"));
+            }
+            BaseUser baseUser = userOptional.get();
+            String profilePictureUrl = null;
+            String backgroundPictureUrl = null;
+
+            // Upload profile picture to Cloudinary
+            if (profilePicture != null && !profilePicture.isEmpty()) {
+                Map uploadResult = cloudinary.uploader().upload(profilePicture.getBytes(),
+                        ObjectUtils.asMap(
+                                "public_id", baseUser.getId() + "_profile",
+                                "folder", "profiles",
+                                "overwrite", true,
+                                "resource_type", "image"
+                        ));
+                profilePictureUrl = uploadResult.get("secure_url").toString();
+            }
+
+            // Upload background picture to Cloudinary
+            if (backgroundPicture != null && !backgroundPicture.isEmpty()) {
+                Map uploadResult = cloudinary.uploader().upload(backgroundPicture.getBytes(),
+                        ObjectUtils.asMap(
+                                "public_id", baseUser.getId() + "_background",
+                                "folder", "backgrounds",
+                                "overwrite", true,
+                                "resource_type", "image"
+                        ));
+                backgroundPictureUrl = uploadResult.get("secure_url").toString();
+            }
+
+
+            Profile profile = Profile.builder()
+                    .profilePictureUrl(profilePictureUrl)
+                    .backgroundPictureUrl(backgroundPictureUrl)
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .phoneNumber(phoneNumber)
+                    .dob(dob)
+                    .user(baseUser)
+                    .build();
+
+            // Save the Profile object (assuming you have a profileJpaService)
+            profileJpaService.createProfile(profile);
+
+            // Associate Profile with BaseUser and save
+            baseUser.setProfile(profile);
+            userJpaService.saveUser(baseUser);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(createSuccessResponse("Profile successfully created", "Profile created"));
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
     @Override
     public ResponseEntity<ApiResponse<?>> loginUser(LoginDTO.Request request) {

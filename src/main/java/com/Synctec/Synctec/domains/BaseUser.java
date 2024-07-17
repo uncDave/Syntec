@@ -42,6 +42,9 @@ public class BaseUser extends BaseEntity implements UserDetails {
 
     private String userName;
 
+    @OneToOne
+    private Profile profile;
+
     @Enumerated(EnumType.STRING)
     private Roles role;
 

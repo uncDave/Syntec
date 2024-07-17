@@ -4,12 +4,14 @@ package com.Synctec.Synctec.service.interfaces.baseuserservice;
 import com.Synctec.Synctec.dtos.request.*;
 import com.Synctec.Synctec.utils.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface BaseUserService {
     ResponseEntity<ApiResponse<?>> registerUser(String email,String password);
     ResponseEntity<ApiResponse<?>> createUserName(CreateUserNameRequest request);
+    ResponseEntity<ApiResponse<?>> createprofile(String userId,MultipartFile profilepicture,MultipartFile background,String firstName,String lastName,String phoneNumber,String dob);
     List<String> generateUsernameSuggestions(String baseIdentifier);
 
     ResponseEntity<ApiResponse<?>> completeResetPassword(ResetPassword.ResetComplete resetComplete);

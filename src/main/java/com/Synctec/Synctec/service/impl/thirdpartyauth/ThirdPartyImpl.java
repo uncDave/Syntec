@@ -193,7 +193,7 @@ public class ThirdPartyImpl implements AuthorizationService {
 
 
     @Override
-    public ResponseEntity<ApiResponse<?>> verifyGoogleAuth(String code, String state, String error) {
+    public ResponseEntity<ApiResponse<?>> verifyAuth(String code, String state, String error) {
 
         try {
             if (error != null) {

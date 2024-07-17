@@ -11,7 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
 
 import static com.Synctec.Synctec.utils.ResponseUtils.createFailureResponse;
@@ -44,6 +46,13 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginDTO.Request request) {
         log.info("Login user {}" + request.getUserName());
         return baseUserService.loginUser(request);
+    }
+    @PostMapping("/create-profile")
+    public ResponseEntity<ApiResponse<?>> createPost(@RequestParam String userId,@RequestParam MultipartFile profilePicture,
+                                                     @RequestParam MultipartFile backgroundPicture,@RequestParam String firstName,@RequestParam String lastName,@RequestParam String phoneNumber,@RequestParam String dob) throws IOException {
+        log.info("This is the file:{}",profilePicture.getOriginalFilename());
+        log.info("this is the request:{}",userId);
+        return baseUserService.createprofile(userId,profilePicture,backgroundPicture,firstName,lastName,phoneNumber,dob);
     }
 
     @PostMapping("/reset-password-otp")
@@ -115,7 +124,7 @@ public class AuthController {
         log.info("google calls this url " + code + "" + state + "" + error);
 
         // Delegate the handling to the service
-        return authorizationService.verifyGoogleAuth(code, state, error);
+        return authorizationService.verifyAuth(code, state, error);
     }
 
     @GetMapping("/initiate-twitter")
